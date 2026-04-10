@@ -8,17 +8,36 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
       workbox: {
-        // Caches all application assets (JS, CSS, HTML, images)
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        // Optional: Strategy for external APIs (if you had one)
-        // runtimeCaching: [...]
+        navigateFallback: '/offline.html',
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true
       },
       manifest: {
-        name: "Campus Manager PWA",
-        short_name: "CampusMgr",
-        theme_color: "#4f46e5",
-        icons: [/* ... (copy icons from manifest.json) */]
+        name: 'Trackie Student Planner',
+        short_name: 'Trackie',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#121212',
+        theme_color: '#121212',
+        description: 'Track classes, assignments, and daily productivity offline.',
+        icons: [
+          {
+            src: '/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
       }
     }),
   ],

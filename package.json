@@ -1,4 +1,10 @@
 {
+  "scripts": {
+    "dev": "npm --prefix tackie run dev",
+    "build": "npm --prefix tackie run build",
+    "lint": "npm --prefix tackie run lint",
+    "preview": "npm --prefix tackie run preview"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",

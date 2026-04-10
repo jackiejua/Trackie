@@ -1,21 +1,23 @@
 {
-  "name": "Campus Manager PWA",
-  "short_name": "CampusMgr",
-  "start_url": ".",
+  "name": "Trackie Student Planner",
+  "short_name": "Trackie",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
-  "description": "Your student assignment and class schedule manager.",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "description": "Track classes, assignments, and daily productivity offline.",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline | Trackie</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 20% 10%, #2b2b2b, #121212 55%);
+        color: #f4f4f4;
+        font-family: Segoe UI, Tahoma, sans-serif;
+      }
+
+      main {
+        width: min(90vw, 480px);
+        border: 1px solid #303030;
+        border-radius: 24px;
+        padding: 2rem;
+        background: #171717;
+      }
+
+      h1 {
+        margin-top: 0;
+        color: #a3e635;
+        font-size: 1.9rem;
+      }
+
+      p {
+        line-height: 1.5;
+        color: #d0d0d0;
+      }
+
+      button {
+        background: #a3e635;
+        color: #101010;
+        border: 0;
+        border-radius: 12px;
+        font-weight: 800;
+        padding: 0.7rem 1.1rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You are offline</h1>
+      <p>Trackie still works with your saved classes, assignments, tasks, and journal entries. Reconnect to check for app updates.</p>
+      <button onclick="location.reload()">Try Again</button>
+    </main>
+  </body>
+</html>

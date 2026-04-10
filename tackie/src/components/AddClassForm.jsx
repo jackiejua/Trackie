@@ -9,7 +9,8 @@ import { addClass } from '../db';
 function AddClassForm({ onClose }) {
   const [name, setName] = useState('');
   const [day, setDay] = useState('');
-  const [time, setTime] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
   const [error, setError] = useState('');
 
@@ -22,8 +23,13 @@ function AddClassForm({ onClose }) {
     e.preventDefault();
     setError('');
 
-    if (!name || !day || !time) {
-      setError('Class Name, Day, and Time are required fields.');
+    if (!name || !day || !startTime || !endTime) {
+      setError('Class Name, Day, Start Time, and End Time are required.');
+      return;
+    }
+
+    if (startTime >= endTime) {
+      setError('End time must be after start time.');
       return;
     }
 
@@ -31,7 +37,9 @@ function AddClassForm({ onClose }) {
       const newClass = {
         name,
         day,
-        time,
+        time: `${startTime} - ${endTime}`,
+        startTime,
+        endTime,
         location: location || 'TBD', // Default if location is left empty
       };
 
@@ -41,7 +49,8 @@ function AddClassForm({ onClose }) {
       // Clear form and close the modal
       setName('');
       setDay('');
-      setTime('');
+      setStartTime('');
+      setEndTime('');
       setLocation('');
       onClose();
 
@@ -93,14 +102,25 @@ function AddClassForm({ onClose }) {
           </select>
         </div>
 
-        {/* Time Input */}
+        {/* Start Time Input */}
         <div>
-          <label htmlFor="time" className="block text-sm font-medium text-gray-700">Start Time</label>
+          <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start Time</label>
           <input
-            id="time"
+            id="startTime"
             type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End Time</label>
+          <input
+            id="endTime"
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
@@ -122,7 +142,7 @@ function AddClassForm({ onClose }) {
       <div className="flex justify-end pt-2">
         <button
           type="submit"
-          className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition-colors"
+          className="px-5 py-2 bg-black text-[#a3e635] font-black rounded-xl hover:opacity-90 transition-opacity"
         >
           Add Class
         </button>
