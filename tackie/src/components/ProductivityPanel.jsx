@@ -67,7 +67,7 @@ function ProductivityPanel() {
   return (
     <div className="space-y-6">
       <section className="bg-[#161616] border border-gray-800 rounded-3xl p-6">
-        <h2 className="text-2xl font-black text-[#a3e635] mb-1">Productivity Check-In</h2>
+        <h2 className="text-2xl font-black text-[#a3e635] mb-1">Wellness Journal</h2>
         <p className="text-sm text-gray-400 mb-4">Rate your day and write a short reflection.</p>
 
         {error && <p className="mb-4 text-sm text-red-300">{error}</p>}
@@ -87,7 +87,7 @@ function ProductivityPanel() {
               setRatingTouched(true);
               setRating(Number(e.target.value));
             }}
-            className="w-full"
+            className="w-full accent-[#a3e635]"
           />
           <p className="text-lg font-black text-white">{activeRating} / 5</p>
           <textarea
@@ -130,12 +130,15 @@ function ProductivityPanel() {
               <option value="motivated">Mood: Motivated</option>
             </select>
 
-            <input
-              value={journalTags}
-              onChange={(e) => setJournalTags(e.target.value)}
-              placeholder="Tags (wins, challenge, gratitude)"
-              className="rounded-xl bg-[#0f0f0f] border border-gray-700 p-3 text-sm text-white"
-            />
+            <div>
+              <input
+                value={journalTags}
+                onChange={(e) => setJournalTags(e.target.value)}
+                placeholder="Tags (optional: wins, challenge, gratitude)"
+                className="w-full rounded-xl bg-[#0f0f0f] border border-gray-700 p-3 text-sm text-white"
+              />
+              <p className="text-xs text-gray-500 mt-1">Tags help group entries so you can find themes later.</p>
+            </div>
           </div>
 
           <textarea
@@ -148,7 +151,7 @@ function ProductivityPanel() {
 
           <button
             type="submit"
-            className="bg-white text-black font-black px-5 py-2 rounded-xl hover:opacity-90"
+            className="bg-[#a3e635] text-black font-black px-5 py-2 rounded-xl hover:opacity-90"
           >
             Save Journal Entry
           </button>

@@ -32,6 +32,17 @@ db.version(2).stores({
   });
 });
 
+// v3 introduces work shift tracking for weekly hour totals.
+db.version(3).stores({
+  classes: '++id, name, day, time, location',
+  todos: '++id, title, deadline, classId, isComplete',
+  tasks: '++id, title, isComplete',
+  journals: '++id, date, createdAt',
+  productivity: '++id, &date, rating, mood',
+  reminders: '++id, todoId, remindAt, sent, isActive',
+  workShifts: '++id, date, startTime, endTime'
+});
+
 // --- Classes ---
 export async function addClass(classData) {
   return db.classes.add(classData);
@@ -72,7 +83,29 @@ export async function getAllData() {
   const tasks = await db.tasks.toArray();
   const journals = await db.journals.toArray();
   const productivity = await db.productivity.toArray();
-  return { classes, todos, tasks, journals, productivity };
+  const workShifts = await db.workShifts.toArray();
+  return { classes, todos, tasks, journals, productivity, workShifts };
+}
+
+export async function addWorkShift(shiftData) {
+  const { date, startTime, endTime, location = '', notes = '' } = shiftData || {};
+
+  if (!date || !startTime || !endTime) {
+    throw new Error('Shift date, start time, and end time are required.');
+  }
+
+  if (startTime >= endTime) {
+    throw new Error('Shift end time must be later than start time.');
+  }
+
+  return db.workShifts.add({
+    date,
+    startTime,
+    endTime,
+    location: location.trim(),
+    notes: notes.trim(),
+    createdAt: new Date().toISOString()
+  });
 }
 
 export async function addJournalEntry({ text, mood, tags = [], prompts = '' }) {
@@ -157,6 +190,10 @@ export async function deleteTodo(id) {
 
 export async function deleteTask(id) {
   return db.tasks.delete(id);
+}
+
+export async function deleteWorkShift(id) {
+  return db.workShifts.delete(id);
 }
 
 export async function deleteJournalEntry(id) {

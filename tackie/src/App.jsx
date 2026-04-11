@@ -10,12 +10,13 @@ import AddTaskForm from './components/AddTaskForm';
 import ClassSchedule from './components/ClassSchedule';
 import TodoList from './components/ToDoList';
 import ProductivityPanel from './components/ProductivityPanel';
+import WorkSchedulePanel from './components/WorkSchedulePanel';
 import TrackieLogo from './images/TrackieLogo.png';
 
 const EMPTY_ITEMS = [];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('Today');
+  const [activeTab, setActiveTab] = useState('Home');
   const [modalType, setModalType] = useState(null); // 'class', 'todo', or 'task'
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -28,9 +29,11 @@ export default function App() {
   const classesQuery = useLiveQuery(() => db.classes.toArray());
   const todosQuery = useLiveQuery(() => db.todos.toArray());
   const tasksQuery = useLiveQuery(() => db.tasks.toArray());
+  const workShiftsQuery = useLiveQuery(() => db.workShifts.toArray());
   const classes = classesQuery ?? EMPTY_ITEMS;
   const todos = todosQuery ?? EMPTY_ITEMS;
   const tasks = tasksQuery ?? EMPTY_ITEMS;
+  const workShifts = workShiftsQuery ?? EMPTY_ITEMS;
 
   useEffect(() => {
     const onOnline = () => setIsOnline(true);
@@ -128,13 +131,44 @@ export default function App() {
   };
 
   const todayAssignments = [...todos]
-    .filter((todo) => !todo.isComplete)
-    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    .sort((a, b) => {
+      if (a.isComplete && !b.isComplete) return 1;
+      if (!a.isComplete && b.isComplete) return -1;
+      return new Date(a.deadline) - new Date(b.deadline);
+    })
     .slice(0, 5);
+
+  const getShiftHours = (shift) => {
+    const [startHour, startMinute] = shift.startTime.split(':').map(Number);
+    const [endHour, endMinute] = shift.endTime.split(':').map(Number);
+    const startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+    const minutes = endTotalMinutes - startTotalMinutes;
+    return minutes > 0 ? minutes / 60 : 0;
+  };
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayWorkShifts = [...workShifts]
+    .filter((shift) => shift.date === todayIso)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  const weekStart = new Date();
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+
+  const weeklyWorkHours = workShifts.reduce((sum, shift) => {
+    const shiftDate = new Date(`${shift.date}T00:00:00`);
+    if (shiftDate >= weekStart && shiftDate < weekEnd) {
+      return sum + getShiftHours(shift);
+    }
+    return sum;
+  }, 0);
 
   const renderMainContent = () => {
     if (activeTab === 'Schedule') {
-      return <ClassSchedule classes={classes} todos={todos} />;
+      return <ClassSchedule classes={classes} todos={todos} workShifts={workShifts} />;
     }
 
     if (activeTab === 'Tasks') {
@@ -174,8 +208,12 @@ export default function App() {
       );
     }
 
-    if (activeTab === 'Productivity') {
+    if (activeTab === 'Journal') {
       return <ProductivityPanel />;
+    }
+
+    if (activeTab === 'Work') {
+      return <WorkSchedulePanel />;
     }
 
     return (
@@ -211,7 +249,7 @@ export default function App() {
             <button type="button" onClick={() => openModal('todo')} className="border-2 border-black rounded-lg px-4 py-1 text-xs font-bold hover:bg-gray-100">+ Assignment</button>
           </div>
           <div className="space-y-4">
-            {todayAssignments.length === 0 && <p className="text-sm text-gray-500">No pending assignments.</p>}
+            {todayAssignments.length === 0 && <p className="text-sm text-gray-500">No assignments yet.</p>}
             {todayAssignments.map((todo) => (
               <div key={todo.id} className="flex justify-between items-start gap-3">
                 <div className="flex-1">
@@ -268,6 +306,35 @@ export default function App() {
             ))}
           </div>
         </section>
+
+        <section className="py-6 md:py-8 border-t border-gray-200">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-black italic">Work This Week</h2>
+            <button
+              type="button"
+              onClick={() => setActiveTab('Work')}
+              className="border-2 border-black rounded-lg px-4 py-1 text-xs font-bold hover:bg-gray-100"
+            >
+              Open Work Log
+            </button>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-4">
+            <p className="text-xs uppercase tracking-wide text-gray-500 font-bold">Total Hours (Sun-Sat)</p>
+            <p className="text-3xl font-black text-gray-900 mt-1">{weeklyWorkHours.toFixed(1)} hrs</p>
+          </div>
+
+          <div className="space-y-3">
+            {todayWorkShifts.length === 0 && <p className="text-sm text-gray-500">No work shifts logged for today.</p>}
+            {todayWorkShifts.map((shift) => (
+              <article key={shift.id} className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
+                <p className="font-bold text-gray-800">Today: {shift.startTime} - {shift.endTime}</p>
+                <p className="text-xs text-gray-500 mt-1">{getShiftHours(shift).toFixed(1)} hours</p>
+                {shift.location && <p className="text-xs text-gray-500">Location: {shift.location}</p>}
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     );
   };
@@ -312,7 +379,7 @@ export default function App() {
             </button>
           </div>
           <nav className="grid grid-cols-1 gap-3">
-            {['Today', 'Schedule', 'Tasks', 'Productivity'].map((tab) => (
+            {['Home', 'Schedule', 'Tasks', 'Journal', 'Work'].map((tab) => (
               <button
                 type="button"
                 key={tab}
@@ -358,13 +425,6 @@ export default function App() {
           <section className="bg-white rounded-3xl p-6 text-black border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-black italic">Upcoming Assignments</h4>
-              <button
-                type="button"
-                onClick={() => openModal('todo')}
-                className="border border-black rounded-lg px-3 py-1 text-xs font-bold hover:bg-gray-100"
-              >
-                + Add
-              </button>
             </div>
             <div className="space-y-3">
               {todayAssignments.length === 0 && (
@@ -372,7 +432,7 @@ export default function App() {
               )}
               {todayAssignments.map((todo) => (
                 <article key={todo.id} className="border border-gray-200 rounded-xl p-3">
-                  <p className="text-sm font-bold text-gray-900">{todo.title}</p>
+                  <p className={`text-sm font-bold ${todo.isComplete ? 'line-through text-gray-400' : 'text-gray-900'}`}>{todo.title}</p>
                   <p className="text-xs text-gray-500 mt-1">{new Date(todo.deadline).toLocaleString()}</p>
                 </article>
               ))}
