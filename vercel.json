@@ -1,0 +1,5 @@
+{
+  "installCommand": "npm --prefix tackie ci",
+  "buildCommand": "npm --prefix tackie run build",
+  "outputDirectory": "tackie/dist"
+}
